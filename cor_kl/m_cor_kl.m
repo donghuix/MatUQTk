@@ -1,6 +1,19 @@
 function [outputs,status,cmdout] = m_cor_kl(cor_kl_exe,data,e)
 % matlab interface for Karhunen-Loeve Decomposition
-%   
+% #-INPUTS-# 
+% cor_kl_exe: directory of cor_kl execute file
+% data: [N x M], N is the dimensionality of the multivariate random
+%       variables, M is the number of samples
+% e: number of eigenvalues requested
+% #--------#
+%
+% #-OUTPUTS-#
+% outputs: structure data for the results
+% status, cmdout: outputs from command line
+% #---------#
+%
+% Donghui Xu, 08/26/2020
+
     if ( ~exist(cor_kl_exe,'file') )
         error([cor_kl_exe ' does not exist!'])
     end
