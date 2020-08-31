@@ -17,9 +17,9 @@ function [xtrain, xval] = m_pce_rv(uqtkbin,pars,rngnum,show_log)
     if ~isempty(ntrain)
         if ispc
             cmd=[uqtkbin 'pce_rv.exe -w PCvar -d '  num2str(in_pcdim) ' -p ' num2str(in_pcdim) ' -x ' pc_type ' -n ' num2str(ntrain) ' -s ' num2str(r(1)) ' > pcrv.log'];
-            fprintf(['Running pce_rv.exe -w PCvar -d '  num2str(in_pcdim) ' -p ' num2str(in_pcdim) ' -x ' pc_type ' -n ' num2str(ntrain) ' -s ' num2str(r(1)) ' > pcrv.log']);
+            fprintf(['Running pce_rv.exe -w PCvar -d '  num2str(in_pcdim) ' -p ' num2str(in_pcdim) ' -x ' pc_type ' -n ' num2str(ntrain) ' -s ' num2str(r(1)) ' > pcrv.log\n']);
         else
-            cmd=[uqtkbin 'pce_rv -w PCvar -d '  num2str(in_pcdim) ' -p ' num2str(in_pcdim) ' -x ' pc_type ' -n ' num2str(ntrain) ' -s ' num2str(r(1)) ' > pcrv.log'];
+            cmd=[uqtkbin 'pce_rv -w PCvar -d '  num2str(in_pcdim) ' -p ' num2str(in_pcdim) ' -x ' pc_type ' -n ' num2str(ntrain) ' -s ' num2str(r(1)) ' > pcrv.log\n'];
             fprintf(['Running ' cmd]);
         end
         system(cmd,'-echo');
@@ -31,9 +31,9 @@ function [xtrain, xval] = m_pce_rv(uqtkbin,pars,rngnum,show_log)
     
     if ~isempty(nval)
         if ispc
-            cmd=[uqtkbin 'pce_rv.exe -w PCvar -d '  num2str(in_pcdim) ' -p ' num2str(in_pcdim) ' -x ' pc_type ' -n ' num2str(nval) ' -s ' num2str(r(2)) ' > pcrv.log'];
+            cmd=[uqtkbin 'pce_rv.exe -w PCvar -d '  num2str(in_pcdim) ' -p ' num2str(in_pcdim) ' -x ' pc_type ' -n ' num2str(nval) ' -s ' num2str(r(2)) ' > pcrv.log\n'];
         else
-            cmd=[uqtkbin 'pce_rv -w PCvar -d '  num2str(in_pcdim) ' -p ' num2str(in_pcdim) ' -x ' pc_type ' -n ' num2str(nval) ' -s ' num2str(r(2)) ' > pcrv.log'];
+            cmd=[uqtkbin 'pce_rv -w PCvar -d '  num2str(in_pcdim) ' -p ' num2str(in_pcdim) ' -x ' pc_type ' -n ' num2str(nval) ' -s ' num2str(r(2)) ' > pcrv.log\n'];
             fprintf(['Running ' cmd]);
         end
         system(cmd,'-echo');
