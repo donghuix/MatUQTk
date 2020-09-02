@@ -1,6 +1,6 @@
 function [ytrain_pc, yval_pc, pccf_all, mindex_all] = m_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt)
     
-    if nargins < 7
+    if nargin < 7
         del_opt = 1; % Default mode is to delete all the files
     end
     
