@@ -23,6 +23,7 @@ function [allsens_main,allsens_total,allsens_joint] = m_pce_sens(uqtkbin,pars,mi
        allsens_joint(i,:,:) = load('jointsens.dat');
    end
    
-   %delete PCcoeff.dat mindex.dat mainsens.dat totsens.dat jointsens.dat
+   delete PCcoeff.dat mindex.dat mainsens.dat totsens.dat jointsens.dat
+   delete sp_mindex.*.dat varfrac.dat
 end
 
