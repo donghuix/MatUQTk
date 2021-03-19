@@ -1,5 +1,9 @@
-function h = plot_val(ytrain_pc,ytrain,yval_pc,yval)
+function h = plot_val(ytrain_pc,ytrain,yval_pc,yval,show_leg)
 %This function is to plot validation of surrogate
+
+if nargin == 4
+    show_leg = 0;
+end
 h(1) = scatter(ytrain,ytrain_pc,72,'s','MarkerFaceColor','b', ...
                                        'MarkerEdgeColor','b', ...
                                        'MarkerFaceAlpha',0.4); hold on; grid on;
@@ -16,10 +20,12 @@ set(gca,'FontSize',13);
 xlabel('Model','FontSize',15,'FontWeight','bold');
 ylabel('Surrogate','FontSize',15,'FontWeight','bold');
 
-leg = legend('Training','Valiating');
-leg.FontSize = 15;
-leg.FontWeight = 'bold';
-leg.Location = 'best';
+if show_leg
+    leg = legend('Training','Valiating');
+    leg.FontSize = 15;
+    leg.FontWeight = 'bold';
+    leg.Location = 'best';
+end
 
 end
 
