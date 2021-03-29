@@ -1,5 +1,5 @@
 UQTK_INS = /Users/xudo627/projects/UQTk/UQTk-install
-CXX = /usr/local/bin/g++-9
+CXX = /usr/local/bin/g++-10 
 CXXFLAGS = -O2
 #-std=c++11
 TARGET = cor_kl
