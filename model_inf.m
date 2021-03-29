@@ -39,9 +39,12 @@ function mapparam = model_inf(uqtkbin, X, Y, mindex_all, pccf_all, PDIM, del_opt
         fprintf(['Running ' cmd '\n']);
     end
     [status,cmdout] = system(cmd,'-echo');
-
-    mapparam = load('mapparam.dat');
-
+    chain = load('chain.dat');
+    likelihood = chain(:,end);
+    ibest = find(likelihood == max(likelihood));
+    mapparam = chain(ibest(1),2:end-3);
+    %mapparam = load('mapparam.dat');
+    
     if del_opt
         delete mindexp*dat pccfp*dat;
         %delete xdata.dat ydata.dat;
