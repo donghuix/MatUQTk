@@ -1,4 +1,4 @@
-function [outputs,status,cmdout] = m_cor_kl(cor_kl_exe,data,e)
+function [outputs,status,cmdout] = m_cor_kl(cor_kl_exe,data,e,reconstruct)
 % matlab interface for Karhunen-Loeve Decomposition
 % #-INPUTS-# 
 % cor_kl_exe: directory of cor_kl execute file
@@ -17,6 +17,10 @@ function [outputs,status,cmdout] = m_cor_kl(cor_kl_exe,data,e)
     if ( ~exist(cor_kl_exe,'file') )
         error([cor_kl_exe ' does not exist!'])
     end
+    
+    if nargin == 3
+        reconstruct = 0;
+    end
     save('ydata.dat','data','-ascii');
     m = size(data,1);
     xgrid = 1 : m; xgrid = xgrid';
@@ -32,6 +36,19 @@ function [outputs,status,cmdout] = m_cor_kl(cor_kl_exe,data,e)
     outputs(1).eig = load('eig.dat');
     outputs(1).rel_diag = load('rel_diag.dat');
     outputs(1).cov_out = load('cov_out.dat');
+    
+    if reconstruct
+        [nsam,neig] = size(outputs.xi);
+        ndim        = length(outputs.mu);
+        data_kl     = NaN(nsam,ndim);
+        for i = 1 : nsam
+            data_kl(i,:) = outputs.mu;
+            for j = 1 : neig
+                data_kl(i,:) = data_kl(i,:) + outputs.xi(i,j).*outputs.KLmodes(:,j)';
+            end
+        end
+        outputs(1).data_kl = data_kl;
+    end
     
     % clean the files
     delete xi_data.dat mean.dat KLmodes.dat eig.dat rel_diag.dat cov_out.dat;
