@@ -44,7 +44,7 @@ function [xtrain, xval] = m_pce_rv(uqtkbin,pars,rngnum,show_log)
     end
     
     if ~show_log
-        delete pcrv.log;
+        delete pcrv.logn;
     end
     delete rvar.dat;
     
