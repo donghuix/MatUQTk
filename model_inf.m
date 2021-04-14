@@ -35,7 +35,7 @@ function mapparam = model_inf(uqtkbin, X, Y, mindex_all, pccf_all, PDIM, del_opt
         cmd = [uqtkbin 'model_inf.exe -f pcs -l classical -d ' num2str(PDIM) ' -m 10000 -o 3' ' > inference.log'];
         fprintf(['Running model_inf.exe -f pcs -l classical -d ' num2str(PDIM) ' -m 10000 -o 3' ' > inference.log']);
     else
-        cmd = [uqtkbin 'model_inf -f pcs -l classical -d ' num2str(PDIM) ' -m 10000 -o 3' ' > inference.log'];
+        cmd = [uqtkbin 'model_inf -f pcs -l classical -c LU -d ' num2str(PDIM) ' -m 5000 -o 3 inference.log'];
         fprintf(['Running ' cmd '\n']);
     end
     [status,cmdout] = system(cmd,'-echo');
@@ -48,8 +48,8 @@ function mapparam = model_inf(uqtkbin, X, Y, mindex_all, pccf_all, PDIM, del_opt
     if del_opt
         delete mindexp*dat pccfp*dat;
         %delete xdata.dat ydata.dat;
-        delete parampccfs.dat fmeans_sams.dat datavars.dat fvars.dat fmeans.dat ...
-               pvars.dat pmeans.dat mapparam.dat pchain.dat;
+%         delete parampccfs.dat fmeans_sams.dat datavars.dat fvars.dat fmeans.dat ...
+%                pvars.dat pmeans.dat mapparam.dat pchain.dat;
         % Do NOT delete chain.dat to be able to construct posterior PDF
         % delete chain.dat;
     end
