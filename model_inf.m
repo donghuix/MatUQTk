@@ -1,4 +1,4 @@
-function mapparam = model_inf(uqtkbin, X, Y, pars, mindex_all, pccf_all, PDIM, del_opt)
+function mapparam = model_inf(uqtkbin, X, Y, pars, mindex_all, pccf_all, del_opt)
 % INPUT:
 % X [ N, S ], N values of inputs, S is dimension of xi
 % Y [ N, 1 ], N values of observations
@@ -30,10 +30,11 @@ function mapparam = model_inf(uqtkbin, X, Y, pars, mindex_all, pccf_all, PDIM, d
 
     end
     
-    if strcmp(pars.pctype,'LU')
+    if strcmp(pars.pc_type,'LU')
         a = -1;
         b = 1;
     end
+    PDIM = pars.in_pcdim;
     
     %cmd = [uqtkbin 'model_inf -f pcs -l classical -d ' num2str(PDIM) ' > inference.log'];
     if ispc
