@@ -1,4 +1,4 @@
-function mapparam = model_inf(uqtkbin, X, Y, mindex_all, pccf_all, PDIM, del_opt)
+function mapparam = model_inf(uqtkbin, X, Y, pars, mindex_all, pccf_all, PDIM, del_opt)
 % INPUT:
 % X [ N, S ], N values of inputs, S is dimension of xi
 % Y [ N, 1 ], N values of observations
@@ -29,13 +29,18 @@ function mapparam = model_inf(uqtkbin, X, Y, mindex_all, pccf_all, PDIM, del_opt
         dlmwrite(['pccfp.' num2str(i-1) '.dat'], pccf, ' ');
 
     end
-
+    
+    if strcmp(pars.pctype,'LU')
+        a = -1;
+        b = 1;
+    end
+    
     %cmd = [uqtkbin 'model_inf -f pcs -l classical -d ' num2str(PDIM) ' > inference.log'];
     if ispc
-        cmd = [uqtkbin 'model_inf.exe -f pcs -l classical -d ' num2str(PDIM) ' -m 10000 -o 3' ' > inference.log'];
-        fprintf(['Running model_inf.exe -f pcs -l classical -d ' num2str(PDIM) ' -m 10000 -o 3' ' > inference.log']);
+        cmd =[uqtkbin 'model_inf.exe -f pcs -l classical -a' num2str(a) ' -b ' num2str(b) ' -d ' num2str(PDIM) ' -m 10000 -o ' num2str(pars.out_pcord) ' > inference.log'];
+        fprintf(['Running ' cmd]);
     else
-        cmd = [uqtkbin 'model_inf -f pcs -l classical -c LU -d ' num2str(PDIM) ' -m 5000 -o 3 > inference.log'];
+        cmd = [uqtkbin 'model_inf -f pcs -l classical -a' num2str(a) ' -b ' num2str(b) ' -d ' num2str(PDIM) ' -m 10000 -o ' num2str(pars.out_pcord) ' > inference.log'];
         fprintf(['Running ' cmd '\n']);
     end
     [status,cmdout] = system(cmd,'-echo');
