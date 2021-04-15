@@ -48,7 +48,7 @@ function mapparam = model_inf(uqtkbin, X, Y, pars, mindex_all, pccf_all, del_opt
     chain = load('chain.dat');
     likelihood = chain(:,end);
     ibest = find(likelihood == max(likelihood));
-    mapparam = chain(ibest(1),2:end-3);
+    mapparam = nanmean(chain(ibest,2:end-3),1);
     %mapparam = load('mapparam.dat');
     
     if del_opt
