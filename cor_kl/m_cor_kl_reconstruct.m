@@ -1,5 +1,8 @@
-function data_kl = m_cor_kl_reconstruct(xi,mu,KLmodes)
-    [nsam,neig] = size(xi);
+function data_kl = m_cor_kl_reconstruct(xi,neig,mu,KLmodes)
+    [nsam,neig2] = size(xi);
+    if neig > neig2
+        error('Select a smaller neig!!!\n');
+    end
     ndim        = length(mu);
     data_kl     = NaN(nsam,ndim);
     for i = 1 : nsam
