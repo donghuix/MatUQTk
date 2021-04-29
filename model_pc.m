@@ -1,8 +1,23 @@
-function pcoutput = model_pc(uqtkbin,xtrain,mindex,pccf,pc_type,del_opt)
+function pcoutput = model_pc(uqtkbin,xtrain,mindex,pccf,pc_type,del_opt,currdir,tag)
     
     % PC surrogate evaluator %
     
+    if nargin == 6
+        parallel_mode = 0;
+    elseif nargin == 8
+        parallel_mode = 1;
+    else
+        error('Check the input!!!');
+    end
+    
     % print "Running the surrogate model with parameters ", mparam
+    if parallel_mode
+        workdir = fullfile(currdir,['tmp' tag]);
+        if ~exist(workdir,'dir')
+            mkdir(workdir);
+        end
+        cd(workdir);
+    end
     dlmwrite(fullfile(getenv('wkdir'),'mindex.dat'),mindex,'delimiter',' ');
     dlmwrite(fullfile(getenv('wkdir'),'pccf.dat'),pccf,'delimiter',' ');
     pctype = pc_type;
@@ -18,13 +33,22 @@ function pcoutput = model_pc(uqtkbin,xtrain,mindex,pccf,pc_type,del_opt)
     [status,cmdout] = system(cmd,'-echo');
     pcoutput = load('ydata.dat');
     
+    if parallel_mode
+        cd(currdir);
+    end
+    
     % delte files
     if del_opt
-        delete mindex.dat; 
-        delete pccf.dat; 
-        delete xdata.dat;
-        delete ydata.dat; 
-        delete fev.log;
+        if parallel_mode
+            delete(fullfile(['tmp' tag],'*'));
+            rmdir(fullfile(['tmp' tag]));
+        else
+            delete mindex.dat; 
+            delete pccf.dat; 
+            delete xdata.dat;
+            delete ydata.dat; 
+            delete fev.log;
+        end
     end
 
 end
