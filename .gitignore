@@ -4,3 +4,4 @@ cor_kl/cor_kl
 cor_kl/cor_kl.o
 *.m~
 cor_kl/Makefile
+*.pyc

@@ -1,11 +1,10 @@
 from sys import platform
+import numpy as np
 import os
 
 def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt):
-
-    [ntrain,nout] = ytrain.shape
-    [nval,nout]   = yval.shape
-
+    ntrain,nout   = ytrain.shape
+    nval,nout     = yval.shape
     pccf_all      = []
     mindex_all    = []
     ytrain_pc     = np.empty((ntrain,nout))
@@ -38,6 +37,8 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt):
 
         if platform == 'win32':
             os.system('mv mindex.dat mi.dat')
+        elif platform == 'darwin':
+            os.system('mv mindex.dat mi.dat')
         mi = np.loadtxt('mi.dat')
         npc = mi.shape[0]
 
@@ -50,11 +51,11 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt):
 
         if platform == 'darwin':
             cmd = uqtkbin + 'regression -x xdata.dat -y ydata.dat -b PC_MI -s ' + pc_type +       \
-                    ' -p mi.dat -w regparams.dat -m ' + pred_mod + ' -r wbcs -t xcheck.dat -c ' + \
+                    ' -p mi.dat -w regparams.dat -m ' + pred_mode + ' -r wbcs -t xcheck.dat -c ' + \
                     str(tol) + ' > regr.log'
         elif platform == 'win32':
             cmd = uqtkbin + 'regression.exe -x xdata.dat -y ydata.dat -b PC_MI -s ' + pc_type +   \
-                    ' -p mi.dat -w regparams.dat -m ' + pred_mod + ' -r wbcs -t xcheck.dat -c ' + \
+                    ' -p mi.dat -w regparams.dat -m ' + pred_mode + ' -r wbcs -t xcheck.dat -c ' + \
                     str(tol) + ' > regr.log'
         print('Running ' + cmd)
 
@@ -62,22 +63,22 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt):
 
         # Get the PC coefficients and multiindex and the predictive errorbars
         pccf   = np.loadtxt('coeff.dat')
-        mindex = lnp.loadtxt('mindex_new.dat')
+        mindex = np.loadtxt('mindex_new.dat')
 
         # Append the results
-        pccf_all.append(pcff)
+        pccf_all.append(pccf)
         mindex_all.append(mindex)
 
         # Evaluate surrogate at training points
         print('Evaluating surrogate at %d training points' % ntrain)
-        ytrain_pc[:,i] = model_pc(uqtkbin,xtrain,mindex,pccf,pars,del_opt)
-        err_train[i]   = norm(ytrain[:,i]-ytrain_pc[:,i])/norm(ytrain[:,i])
+        ytrain_pc[:,i] = model_pc(uqtkbin,xtrain,pccf,mindex,pars,del_opt)
+        err_train[i]   = np.linalg.norm(ytrain[:,i]-ytrain_pc[:,i])/np.linalg.norm(ytrain[:,i])
         print('Surrogate relative error at training points : ' + str(err_train[i]))
 
         # Evaluate surrogate at validating points
         print('Evaluating surrogate at %d validating points' % nval)
-        yval_pc[:,i] = model_pc(uqtkbin,xval,mindex,pccf,pars,del_opt)
-        err_val[i]   = norm(yval[:,i]-yval_pc[:,i])/norm(yval[:,i])
+        yval_pc[:,i] = model_pc(uqtkbin,xval,pccf,mindex,pars,del_opt)
+        err_val[i]   = np.linalg.norm(yval[:,i]-yval_pc[:,i])/np.linalg.norm(yval[:,i])
         print('Surrogate relative error at validating points : ' + str(err_val[i]))
     
     if del_opt:
@@ -94,7 +95,7 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt):
         os.remove("sigma2.dat")
         os.remove("ycheck.dat") 
         os.remove("ycheck_var.dat")
-        
+
     return ytrain_pc, yval_pc, pccf_all, mindex_all
 
 def model_pc(uqtkbin, x, pccf, mindex, pars, del_opt):
@@ -112,9 +113,12 @@ def model_pc(uqtkbin, x, pccf, mindex, pars, del_opt):
 
     if del_opt:
         os.remove("mindex.dat") 
-        os.remove("ccf.dat")
+        os.remove("pccf.dat")
         os.remove("xdata.dat")
         os.remove("ydata.dat")
-        os.remove("ev.log")
+        os.remove("fev.log")
 
     return pcoutput
+
+def test(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt):
+    print('this is test!')
