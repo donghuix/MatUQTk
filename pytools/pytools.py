@@ -41,17 +41,17 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
 
         np.savetxt('ydata.dat',ydata,delimiter='\t')
 
-        if platform == 'darwin':
-            cmd1 = uqtkbin + 'gen_mi -x"TO" -p ' + str(out_pcord) + ' -q' + str(in_pcdim) + ' > gmi.log'
+        if platform == 'darwin' or platform == 'linux':
+            cmd = uqtkbin + 'gen_mi -x"TO" -p ' + str(out_pcord) + ' -q' + str(in_pcdim) + ' > gmi.log'
         elif platform == 'win32':
-            cmd1 = uqtkbin + 'gen_mi.exe -x"TO" -p ' + str(out_pcord) + ' -q' + str(in_pcdim) + ' > gmi.log'
-        print('Running ' + cmd1)
+            cmd = uqtkbin + 'gen_mi.exe -x"TO" -p ' + str(out_pcord) + ' -q' + str(in_pcdim) + ' > gmi.log'
+        print('Running ' + cmd)
 
-        os.system(cmd1)
+        os.system(cmd)
 
         if platform == 'win32':
             os.system('mv mindex.dat mi.dat')
-        elif platform == 'darwin':
+        elif platform == 'darwin' or platform == 'linux':
             os.system('mv mindex.dat mi.dat')
         mi = np.loadtxt('mi.dat')
         npc = mi.shape[0]
@@ -63,17 +63,17 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
         np.savetxt('xcheck.dat',xcheck,delimiter='\t')
         np.savetxt('regparams.dat',regparams,delimiter='\t')
 
-        if platform == 'darwin':
-            cmd1 = uqtkbin + 'regression -x xdata.dat -y ydata.dat -b PC_MI -s ' + pc_type +       \
+        if platform == 'darwin' or platform == 'linux':
+            cmd = uqtkbin + 'regression -x xdata.dat -y ydata.dat -b PC_MI -s ' + pc_type +       \
                     ' -p mi.dat -w regparams.dat -m ' + pred_mode + ' -r wbcs -t xcheck.dat -c ' + \
                     str(tol) + ' > regr.log'
         elif platform == 'win32':
-            cmd1 = uqtkbin + 'regression.exe -x xdata.dat -y ydata.dat -b PC_MI -s ' + pc_type +   \
+            cmd = uqtkbin + 'regression.exe -x xdata.dat -y ydata.dat -b PC_MI -s ' + pc_type +   \
                     ' -p mi.dat -w regparams.dat -m ' + pred_mode + ' -r wbcs -t xcheck.dat -c ' + \
                     str(tol) + ' > regr.log'
-        print('Running ' + cmd1)
+        print('Running ' + cmd)
 
-        os.system(cmd1)
+        os.system(cmd)
 
         # Get the PC coefficients and multiindex and the predictive errorbars
         pccf   = np.loadtxt('coeff.dat')
@@ -179,15 +179,15 @@ def model_inf(uqtkbin, X, Y, pars, mindex_all, pccf_all, del_opt, cur_dir=None, 
     else:
         sys.exit(pc_type + ' is not surpported now.')
     
-    if platform == 'darwin':
-        cmd1 = uqtkbin + 'model_inf -f pcs -l classical -a ' + str(a) + ' -b ' + str(b) +  ' -d ' +    \
+    if platform == 'darwin' or platform == 'linux':
+        cmd = uqtkbin + 'model_inf -f pcs -l classical -a ' + str(a) + ' -b ' + str(b) +  ' -d ' +    \
                 str(in_pcdim) + ' -m ' + str(nmcmc) + ' -o ' + str(out_pcord) + ' > inference.log'  
     elif platform == 'win32':
-        cmd1 = uqtkbin + 'model_inf.exe -f pcs -l classical -a ' + str(a) + ' -b ' + str(b) +  ' -d '+ \
+        cmd = uqtkbin + 'model_inf.exe -f pcs -l classical -a ' + str(a) + ' -b ' + str(b) +  ' -d '+ \
                 str(in_pcdim) + ' -m ' + str(nmcmc) + ' -o ' + str(out_pcord) + ' > inference.log'    
-    print('Running ' + cmd1)
+    print('Running ' + cmd)
 
-    os.system(cmd1)
+    os.system(cmd)
 
     mapparam = np.loadtxt('mapparam.dat')
     pchain   = np.loadtxt('pchain.dat')
@@ -226,9 +226,12 @@ def model_pc(uqtkbin, x, pccf, mindex, pars, del_opt):
     pctype=pars['pc_type']
 
     np.savetxt('xdata.dat',x)
-    cmd1="pce_eval -x'PC_mi' -f'pccf.dat' -s"+pctype+" -r'mindex.dat' > fev.log"
-    print("Running %s" % cmd1)
-    os.system(uqtkbin+cmd1)
+    if platform == 'darwin' or platform == 'linux':
+        cmd="pce_eval -x'PC_mi' -f'pccf.dat' -s"+pctype+" -r'mindex.dat' > fev.log"
+    elif platform == 'win32':
+        cmd="pce_eval.exe -x'PC_mi' -f'pccf.dat' -s"+pctype+" -r'mindex.dat' > fev.log"
+    print("Running %s" % cmd)
+    os.system(uqtkbin+cmd)
     pcoutput=np.loadtxt('ydata.dat')
 
     if del_opt:
