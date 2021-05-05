@@ -42,12 +42,12 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
         np.savetxt('ydata.dat',ydata,delimiter='\t')
 
         if platform == 'darwin':
-            cmd = uqtkbin + 'gen_mi -x"TO" -p ' + str(out_pcord) + ' -q' + str(in_pcdim) + ' > gmi.log'
+            cmd1 = uqtkbin + 'gen_mi -x"TO" -p ' + str(out_pcord) + ' -q' + str(in_pcdim) + ' > gmi.log'
         elif platform == 'win32':
-            cmd = uqtkbin + 'gen_mi.exe -x"TO" -p ' + str(out_pcord) + ' -q' + str(in_pcdim) + ' > gmi.log'
-        print('Running ' + cmd)
+            cmd1 = uqtkbin + 'gen_mi.exe -x"TO" -p ' + str(out_pcord) + ' -q' + str(in_pcdim) + ' > gmi.log'
+        print('Running ' + cmd1)
 
-        os.system(cmd)
+        os.system(cmd1)
 
         if platform == 'win32':
             os.system('mv mindex.dat mi.dat')
@@ -64,16 +64,16 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
         np.savetxt('regparams.dat',regparams,delimiter='\t')
 
         if platform == 'darwin':
-            cmd = uqtkbin + 'regression -x xdata.dat -y ydata.dat -b PC_MI -s ' + pc_type +       \
+            cmd1 = uqtkbin + 'regression -x xdata.dat -y ydata.dat -b PC_MI -s ' + pc_type +       \
                     ' -p mi.dat -w regparams.dat -m ' + pred_mode + ' -r wbcs -t xcheck.dat -c ' + \
                     str(tol) + ' > regr.log'
         elif platform == 'win32':
-            cmd = uqtkbin + 'regression.exe -x xdata.dat -y ydata.dat -b PC_MI -s ' + pc_type +   \
+            cmd1 = uqtkbin + 'regression.exe -x xdata.dat -y ydata.dat -b PC_MI -s ' + pc_type +   \
                     ' -p mi.dat -w regparams.dat -m ' + pred_mode + ' -r wbcs -t xcheck.dat -c ' + \
                     str(tol) + ' > regr.log'
-        print('Running ' + cmd)
+        print('Running ' + cmd1)
 
-        os.system(cmd)
+        os.system(cmd1)
 
         # Get the PC coefficients and multiindex and the predictive errorbars
         pccf   = np.loadtxt('coeff.dat')
@@ -180,14 +180,14 @@ def model_inf(uqtkbin, X, Y, pars, mindex_all, pccf_all, del_opt, cur_dir=None, 
         sys.exit(pc_type + ' is not surpported now.')
     
     if platform == 'darwin':
-        cmd = uqtkbin + 'model_inf -f pcs -l classical -a ' + str(a) + ' -b ' + str(b) +  ' -d ' +    \
+        cmd1 = uqtkbin + 'model_inf -f pcs -l classical -a ' + str(a) + ' -b ' + str(b) +  ' -d ' +    \
                 str(in_pcdim) + ' -m ' + str(nmcmc) + ' -o ' + str(out_pcord) + ' > inference.log'  
     elif platform == 'win32':
-        cmd = uqtkbin + 'model_inf.exe -f pcs -l classical -a ' + str(a) + ' -b ' + str(b) +  ' -d '+ \
+        cmd1 = uqtkbin + 'model_inf.exe -f pcs -l classical -a ' + str(a) + ' -b ' + str(b) +  ' -d '+ \
                 str(in_pcdim) + ' -m ' + str(nmcmc) + ' -o ' + str(out_pcord) + ' > inference.log'    
-    print('Running ' + cmd)
+    print('Running ' + cmd1)
 
-    os.system(cmd)
+    os.system(cmd1)
 
     mapparam = np.loadtxt('mapparam.dat')
     pchain   = np.loadtxt('pchain.dat')
@@ -226,9 +226,9 @@ def model_pc(uqtkbin, x, pccf, mindex, pars, del_opt):
     pctype=pars['pc_type']
 
     np.savetxt('xdata.dat',x)
-    cmd="pce_eval -x'PC_mi' -f'pccf.dat' -s"+pctype+" -r'mindex.dat' > fev.log"
-    print("Running %s" % cmd)
-    os.system(uqtkbin+cmd)
+    cmd1="pce_eval -x'PC_mi' -f'pccf.dat' -s"+pctype+" -r'mindex.dat' > fev.log"
+    print("Running %s" % cmd1)
+    os.system(uqtkbin+cmd1)
     pcoutput=np.loadtxt('ydata.dat')
 
     if del_opt:
