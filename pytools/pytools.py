@@ -2,6 +2,8 @@ from sys import platform
 import numpy as np
 import os
 import shutil
+import sys
+import glob
 
 def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None):
 
@@ -115,6 +117,106 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
             os.remove("ycheck_var.dat")
 
     return ytrain_pc, yval_pc, pccf_all, mindex_all
+
+def model_inf(uqtkbin, X, Y, pars, mindex_all, pccf_all, del_opt, cur_dir=None, tag=None):
+# INPUT:
+# uqtkbin: UQTk installed function dirctory
+# X [ N ]: design or controllable parameter
+# Y [ N ]: observations
+# pars   : MatUQTk parameter structure
+# mindex_all
+# pccf_all
+# del_opt: del_opt = 1 -> delete all the middle files 
+# currdir, tag: for parallel processing     
+    if cur_dir == None:
+        run_in_parallel = False
+    else:
+        run_in_parallel = True
+    
+    if X == None:
+        X = np.arange(len(mindex_all))+1
+    if not isinstance(Y, list):
+        ny = 1
+        nx = 1
+    else:
+        nx = len(X)
+        ny = len(Y)
+    nm = len(mindex_all)
+    nf = len(pccf_all)
+    assert(nx == ny, 'Check the size of X and Y!!!')
+    assert(nm == nf, 'Cehck the size of PC data!!!')
+
+    pc_type       = pars['pc_type']
+    in_pcdim      = pars['in_pcdim']
+    out_pcord     = pars['out_pcord']
+    pred_mode     = pars['pred_mode']
+    tol           = pars['tol']
+
+    if 'nmcmc' in pars.keys():
+        nmcmc = pars['nmcmc']
+    else:
+        nmcmc = 10000
+
+    if run_in_parallel:
+        if not os.path.isdir(cur_dir + '/tmp' + str(tag)):
+            os.mkdir(cur_dir + '/tmp' + str(tag))
+        os.chdir(cur_dir + '/tmp' + str(tag))
+    
+    np.savetxt('xdata.dat',X,delimiter='\t')
+    np.savetxt('ydata.dat',Y,delimiter='\t')
+
+    for i in range(nm):
+        mindex = mindex_all[i]
+        pccf   = pccf_all[i]
+        np.savetxt('mindexp.'+str(i)+'.dat',mindex,delimiter='\t')
+        np.savetxt('pccfp.'+str(i)+'.dat',pccf,delimiter='\t')
+        np.savetxt('mindexp.'+str(i)+'_pred.dat',mindex,delimiter='\t')
+        np.savetxt('pccfp.'+str(i)+'_pred.dat',pccf,delimiter='\t')
+    
+    if pc_type == 'LU':
+        a = -1
+        b = 1
+    else:
+        sys.exit(pc_type + ' is not surpported now.')
+    
+    if platform == 'darwin':
+        cmd = uqtkbin + 'model_inf -f pcs -l classical -a ' + str(a) + ' -b ' + str(b) +  ' -d ' +    \
+                str(in_pcdim) + ' -m ' + str(nmcmc) + ' -o ' + str(out_pcord) + ' > inference.log'  
+    elif platform == 'win32':
+        cmd = uqtkbin + 'model_inf.exe -f pcs -l classical -a ' + str(a) + ' -b ' + str(b) +  ' -d '+ \
+                str(in_pcdim) + ' -m ' + str(nmcmc) + ' -o ' + str(out_pcord) + ' > inference.log'    
+    print('Running ' + cmd)
+
+    os.system(cmd)
+
+    mapparam = np.loadtxt('mapparam.dat')
+    pchain   = np.loadtxt('pchain.dat')
+
+    if run_in_parallel:
+        os.chdir(cur_dir)
+
+    if del_opt:
+        if run_in_parallel:
+            shutil.rmtree(cur_dir + '/tmp' + str(tag)) 
+        else:
+            os.remove("xdata.dat") 
+            os.remove("ydata.dat")
+            os.remove("parampccfs.dat")
+            os.remove("fmeans_sams.dat")
+            os.remove("datavars.dat") 
+            os.remove("fvars.dat")
+            os.remove("fmeans.dat")
+            os.remove("pvars.dat")
+            os.remove("pmeans.dat")
+            os.remove("mapparam.dat")
+            os.remove("pchain.dat")
+            os.remove("chain.dat") 
+            for file in glob.glob('mindexp*dat'):
+                os.remove(file)
+            for file in glob.glob('pccfp*dat'):
+                os.remove(file)
+    return mapparam, pchain
+        
 
 def model_pc(uqtkbin, x, pccf, mindex, pars, del_opt):
     """PC surrogate evaluator"""
