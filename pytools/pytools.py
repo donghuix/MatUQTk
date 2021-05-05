@@ -1,8 +1,15 @@
 from sys import platform
 import numpy as np
 import os
+import shutil
 
-def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt):
+def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None):
+
+    if cur_dir == None:
+        run_in_parallel = False
+    else:
+        run_in_parallel = True
+
     ntrain,nout   = ytrain.shape
     nval,nout     = yval.shape
     pccf_all      = []
@@ -19,6 +26,11 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt):
     tol           = pars['tol']
 
     print('************ Trainning Surrogate Model ************')
+
+    if run_in_parallel:
+        if not os.path.isdir(cur_dir + '/tmp' + str(tag)):
+            os.mkdir(cur_dir + '/tmp' + str(tag))
+        os.chdir(cur_dir + '/tmp' + str(tag))
 
     for i in range(nout):
         print('##################################################')
@@ -81,20 +93,26 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt):
         err_val[i]   = np.linalg.norm(yval[:,i]-yval_pc[:,i])/np.linalg.norm(yval[:,i])
         print('Surrogate relative error at validating points : ' + str(err_val[i]))
     
+    if run_in_parallel:
+        os.chdir(cur_dir)
+
     if del_opt:
-        os.remove("xcheck.dat") 
-        os.remove("regparams.dat")
-        os.remove("regr.log")
-        os.remove("mi.dat")
-        os.remove("gmi.log") 
-        os.remove("mindex_new.dat")
-        os.remove("coeff.dat")
-        os.remove("lambdas.dat")
-        os.remove("selected.dat")
-        os.remove("Sig.dat")
-        os.remove("sigma2.dat")
-        os.remove("ycheck.dat") 
-        os.remove("ycheck_var.dat")
+        if run_in_parallel:
+            shutil.rmtree(cur_dir + '/tmp' + str(tag)) 
+        else:
+            os.remove("xcheck.dat") 
+            os.remove("regparams.dat")
+            os.remove("regr.log")
+            os.remove("mi.dat")
+            os.remove("gmi.log") 
+            os.remove("mindex_new.dat")
+            os.remove("coeff.dat")
+            os.remove("lambdas.dat")
+            os.remove("selected.dat")
+            os.remove("Sig.dat")
+            os.remove("sigma2.dat")
+            os.remove("ycheck.dat") 
+            os.remove("ycheck_var.dat")
 
     return ytrain_pc, yval_pc, pccf_all, mindex_all
 
