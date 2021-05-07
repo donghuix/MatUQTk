@@ -24,6 +24,7 @@ def train_pce(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
         os.chdir(cur_dir)
     if del_opt:
         if run_in_parallel:
+            print('here to delete' + cur_dir + '/tmp' + str(tag))
             shutil.rmtree(cur_dir + '/tmp' + str(tag)) 
 
     return ytrain_pc, yval_pc, pccf_all, mindex_all, allsens_main, allsens_total, allsens_joint
