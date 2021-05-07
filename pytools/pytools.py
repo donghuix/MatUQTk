@@ -168,7 +168,7 @@ def p_pce_sens(uqtkbin, pars, mindex_all, pccf_all, del_opt):
         pccf   = pccf_all[i]
         
         if not np.isnan(pccf).any():
-            if len(pccf) == 1:
+            if isinstance(pccf,float):
                 np.savetxt('PCcoeff.dat',pccf*np.ones((1,1)))
                 np.savetxt('mindex.dat',np.reshape(mindex,(1,len(mindex))),fmt='%d')
             else:
