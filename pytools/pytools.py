@@ -20,8 +20,8 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
     yval_pc       = np.empty((nval,nout))
     ytrain_pc[:]  = np.nan
     yval_pc[:]    = np.nan
-    err_train     = np.empty((ntrain,1))
-    err_val       = np.empty((nval,1))
+    err_train     = np.empty((nout,1))
+    err_val       = np.empty((nout,1))
     err_train[:]  = np.nan
     err_val[:]    = np.nan
 
