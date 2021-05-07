@@ -53,6 +53,8 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
                 cmd = uqtkbin + 'gen_mi -x"TO" -p ' + str(out_pcord) + ' -q' + str(in_pcdim) + ' > gmi.log'
             elif platform == 'win32':
                 cmd = uqtkbin + 'gen_mi.exe -x"TO" -p ' + str(out_pcord) + ' -q' + str(in_pcdim) + ' > gmi.log'
+            else:
+                sys.exit('platform: ' + platform + ' not included now')
             print('Running ' + cmd)
 
             os.system(cmd)
@@ -79,6 +81,8 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
                 cmd = uqtkbin + 'regression.exe -x xdata.dat -y ydata.dat -b PC_MI -s ' + pc_type +   \
                         ' -p mi.dat -w regparams.dat -m ' + pred_mode + ' -r wbcs -t xcheck.dat -c ' + \
                         str(tol) + ' > regr.log'
+            else:
+                sys.exit('platform: ' + platform + ' not included now')
             print('Running ' + cmd)
 
             os.system(cmd)
@@ -125,6 +129,49 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
             os.remove("ycheck_var.dat")
 
     return ytrain_pc, yval_pc, pccf_all, mindex_all
+
+def p_pce_sens(uqtkbin, pars, mindex_all, pccf_all, del_opt):
+
+    pc_type  = pars['pc_type']
+    in_pcdim = pars['in_pcdim']
+    nout     = len(mindex_all)
+
+    allsens_main  = np.zeros((nout,in_pcdim))
+    allsens_total = np.zeros((nout,in_pcdim))
+    allsens_joint = np.zeros((nout,in_pcdim,in_pcdim))
+
+    for i in range(nout):
+        mindex = mindex_all[i]
+        pccf   = pccf_all[i]
+
+        np.savetxt('PCcoeff.dat',pccf,delimiter='\t')
+        np.savetxt('mindex.dat',mindex,fmt='%d')
+
+        if platform == 'darwin' or platform == 'linux':
+            cmd = uqtkbin + 'pce_sens -m mindex.dat -f PCcoeff.dat -x ' + pc_type + ' > pcsens.log'
+        elif platform == 'win32':
+            cmd = uqtkbin + 'pce_sens.exe -m mindex.dat -f PCcoeff.dat -x ' + pc_type + ' > pcsens.log'
+        else:
+            sys.exit('platform: ' + platform + ' not included now')
+        print('Running ' + cmd)
+
+        os.system(cmd)
+
+        allsens_main[i,:]    = np.loadtxt('mainsens.dat')
+        allsens_total[i,:]   = np.loadtxt('totsens.dat')
+        allsens_joint[i,:,:] = np.loadtxt('jointsens.dat')
+
+    if del_opt == 1:
+        os.remove('PCcoeff.dat')
+        os.remove('mindex.dat')
+        os.remove('mainsens.dat')
+        os.remove('totsens.dat')
+        os.remove('jointsens.dat')
+        os.remove('varfrac.dat')
+        for file in glob.glob('sp_mindex.*.dat'):
+            os.remove(file)
+    
+    return allsens_main, allsens_total, allsens_joint
 
 def model_inf(uqtkbin, X, Y, pars, mindex_all, pccf_all, del_opt, cur_dir=None, tag=None):
 # INPUT:
