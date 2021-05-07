@@ -226,8 +226,8 @@ def model_inf(uqtkbin, X, Y, pars, mindex_all, pccf_all, del_opt, cur_dir=None, 
         ny = len(Y)
     nm = len(mindex_all)
     nf = len(pccf_all)
-    assert(nx == ny, 'Check the size of X and Y!!!')
-    assert(nm == nf, 'Cehck the size of PC data!!!')
+    assert(nx == ny)
+    assert(nm == nf)
 
     pc_type       = pars['pc_type']
     in_pcdim      = pars['in_pcdim']
