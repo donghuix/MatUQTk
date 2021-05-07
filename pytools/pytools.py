@@ -5,6 +5,29 @@ import shutil
 import sys
 import glob
 
+def train_pce(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None):
+    if cur_dir == None:
+        run_in_parallel = False
+    else:
+        run_in_parallel = True
+    
+    if run_in_parallel:
+        if not os.path.isdir(cur_dir + '/tmp' + str(tag)):
+            os.mkdir(cur_dir + '/tmp' + str(tag))
+        os.chdir(cur_dir + '/tmp' + str(tag))
+    # Find coefficeint with Bayesian conpressive sensing
+    ytrain_pc, yval_pc, pccf_all, mindex_all = p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt)
+    # Sensitivity analysis
+    allsens_main, allsens_total, allsens_joint = p_pce_sens(uqtkbin, pars, mindex_all, pccf_all, del_opt) 
+
+    if run_in_parallel:
+        os.chdir(cur_dir)
+    if del_opt:
+        if run_in_parallel:
+            shutil.rmtree(cur_dir + '/tmp' + str(tag)) 
+
+    return ytrain_pc, yval_pc, pccf_all, mindex_all, allsens_main, allsens_total, allsens_joint
+
 def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None):
 
     if cur_dir == None:
@@ -106,7 +129,7 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
             yval_pc[:,i] = model_pc(uqtkbin,xval,pccf,mindex,pars,del_opt)
             err_val[i]   = np.linalg.norm(yval[:,i]-yval_pc[:,i])/np.linalg.norm(yval[:,i])
             print('Surrogate relative error at validating points : ' + str(err_val[i]))
-        
+
     if run_in_parallel:
         os.chdir(cur_dir)
 
