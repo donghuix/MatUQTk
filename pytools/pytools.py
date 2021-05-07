@@ -167,8 +167,12 @@ def p_pce_sens(uqtkbin, pars, mindex_all, pccf_all, del_opt):
         mindex = mindex_all[i]
         pccf   = pccf_all[i]
 
-        np.savetxt('PCcoeff.dat',pccf,delimiter='\t')
-        np.savetxt('mindex.dat',mindex,fmt='%d')
+        if pccf.size == 1:
+            np.savetxt('PCcoeff.dat',pccf*np.ones((1,1)))
+            np.savetxt('mindex.dat',np.reshape(mindex,(1,len(mindex))),fmt='%d')
+        else:
+            np.savetxt('PCcoeff.dat',pccf,delimiter='\t')
+            np.savetxt('mindex.dat',mindex,fmt='%d')
 
         if platform == 'darwin' or platform == 'linux':
             cmd = uqtkbin + 'pce_sens -m mindex.dat -f PCcoeff.dat -x ' + pc_type + ' > pcsens.log'
