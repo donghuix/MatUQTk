@@ -132,7 +132,10 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
             print('Surrogate relative error at validating points : ' + str(err_val[i]))
 
     if run_in_parallel:
+        allsens_main, allsens_total, allsens_joint = p_pce_sens(uqtkbin, pars, mindex_all, pccf_all, False) 
         os.chdir(cur_dir)
+    else:
+        allsens_main, allsens_total, allsens_joint = p_pce_sens(uqtkbin, pars, mindex_all, pccf_all, del_opt) 
 
     if del_opt:
         if run_in_parallel:
@@ -152,7 +155,7 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
             os.remove("ycheck.dat") 
             os.remove("ycheck_var.dat")
 
-    return ytrain_pc, yval_pc, pccf_all, mindex_all
+    return ytrain_pc, yval_pc, pccf_all, mindex_all, allsens_main, allsens_total, allsens_joint
 
 def p_pce_sens(uqtkbin, pars, mindex_all, pccf_all, del_opt):
 
