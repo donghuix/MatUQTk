@@ -29,16 +29,16 @@ def train_pce(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
 
     return ytrain_pc, yval_pc, pccf_all, mindex_all, allsens_main, allsens_total, allsens_joint
 
-def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None):
+def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None,threhold=None):
 
     if cur_dir == None:
         run_in_parallel = False
     else:
         run_in_parallel = True
 
-    xtrain,ytrain,ntrain,xval,yval,nval = preprocess_training_data(xtrain,ytrain,xval,yval,2)
+    xtrain,ytrain,ntrain,xval,yval,nval = preprocess_training_data(xtrain,ytrain,xval,yval,threhold)
     nout          = ytrain.shape[1]
-    
+
     pccf_all      = []
     mindex_all    = []
     ytrain_pc     = np.empty((ntrain,nout))
