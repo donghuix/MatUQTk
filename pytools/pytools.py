@@ -36,8 +36,9 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
     else:
         run_in_parallel = True
 
-    ntrain,nout   = ytrain.shape
-    nval,nout     = yval.shape
+    xtrain,ytrain,ntrain,xval,yval,nval = preprocess_training_data(xtrain,ytrain,xval,yval,2)
+    nout          = ytrain.shape[1]
+    
     pccf_all      = []
     mindex_all    = []
     ytrain_pc     = np.empty((ntrain,nout))
@@ -334,6 +335,27 @@ def model_pc(uqtkbin, x, pccf, mindex, pars, del_opt):
         os.remove("fev.log")
 
     return pcoutput
+
+def preprocess_training_data(xtrain,ytrain,xval,yval,threhold=2):
+
+    ntrain,nout   = ytrain.shape
+    nval,nout     = yval.shape
+    yall          = np.vstack((ytrain,yval))
+    xall          = np.vstack((xtrain,xval))
+    ratio         = ntrain / (ntrain + nval)
+
+    ii = np.where(np.mean(yall,axis=1) < np.mean(threhold*np.mean(yall,axis=0)))
+    yall = yall[ii[0],:]
+    xall = xall[ii[0],:]
+    ntot,nout = yall.shape
+    ntrain = int(np.ceil(ratio*ntot))
+    nval   = ntot - ntrain
+    ytrain = yall[:ntrain,:]
+    yval   = yall[ntrain:,:]
+    xtrain = xall[:ntrain,:]
+    xval   = xall[ntrain:,:]
+
+    return xtrain,ytrain,ntrain,xval,yval,nval
 
 def test(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt):
     print('this is test!')
