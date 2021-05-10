@@ -39,7 +39,7 @@ def get_default_parameter():
     pars['tol']       = 1e-3
 
     return pars
-    
+
 def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None,threhold=None):
 
     if cur_dir == None:
@@ -188,7 +188,7 @@ def p_pce_sens(uqtkbin, pars, mindex_all, pccf_all, del_opt):
         mindex = mindex_all[i]
         pccf   = pccf_all[i]
         
-        if not np.isnan(pccf).any():
+        if not np.isnan(pccf).any() and np.mean(ytrain) > 0:
             if isinstance(pccf,float):
                 np.savetxt('PCcoeff.dat',pccf*np.ones((1,1)))
                 np.savetxt('mindex.dat',np.reshape(mindex,(1,len(mindex))),fmt='%d')
