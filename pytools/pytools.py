@@ -50,6 +50,7 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
     ntrain0 = xtrain.shape[0]
     xtrain,ytrain,ntrain,xval,yval,nval = preprocess_training_data(xtrain,ytrain,xval,yval,threhold)
     nout          = ytrain.shape[1]
+    npar          = xtrain.shape[1]
 
     pccf_all      = []
     mindex_all    = []
@@ -59,10 +60,16 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
     yval_pc[:]    = np.nan
     err_train     = np.empty((nout,1))
     err_val       = np.empty((nout,1))
+    allsens_main  = np.empty((nout,npar))
+    allsens_total = np.empty((nout,npar))
+    allsens_joint = np.empty((nout,npar,npar))
     R2val         = np.empty((1,1))
     err_train[:]  = np.nan
     err_val[:]    = np.nan
     R2val[:]      = np.nan
+    allsens_main[:]  = np.nan
+    allsens_total[:] = np.nan
+    allsens_joint[:] = np.nan
 
     pc_type       = pars['pc_type']
     in_pcdim      = pars['in_pcdim']
