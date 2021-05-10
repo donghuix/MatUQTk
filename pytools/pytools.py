@@ -47,6 +47,7 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
     else:
         run_in_parallel = True
 
+    ntrain0 = xtrain.shape[0]
     xtrain,ytrain,ntrain,xval,yval,nval = preprocess_training_data(xtrain,ytrain,xval,yval,threhold)
     nout          = ytrain.shape[1]
 
@@ -69,108 +70,111 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
     pred_mode     = pars['pred_mode']
     tol           = pars['tol']
 
-    print('************ Trainning Surrogate Model ************')
-
-    if run_in_parallel:
-        if not os.path.isdir(cur_dir + '/tmp' + str(tag)):
-            os.mkdir(cur_dir + '/tmp' + str(tag))
-        os.chdir(cur_dir + '/tmp' + str(tag))
-
-    for i in range(nout):
-        print('##################################################')
-        print('-------------------- ' + str(i) + 'th QOI --------------------')
-        ydata = ytrain[:,i]
-
-        if np.isnan(ydata).all():
-            pccf_all.append(np.nan)
-            mindex_all.append(np.nan)
-        else:
-            np.savetxt('ydata.dat',ydata,delimiter='\t')
-
-            if platform == 'darwin' or platform == 'linux':
-                cmd = uqtkbin + 'gen_mi -x"TO" -p ' + str(out_pcord) + ' -q' + str(in_pcdim) + ' > gmi.log'
-            elif platform == 'win32':
-                cmd = uqtkbin + 'gen_mi.exe -x"TO" -p ' + str(out_pcord) + ' -q' + str(in_pcdim) + ' > gmi.log'
-            else:
-                sys.exit('platform: ' + platform + ' not included now')
-            print('Running ' + cmd)
-
-            os.system(cmd)
-
-            if platform == 'win32':
-                os.system('mv mindex.dat mi.dat')
-            elif platform == 'darwin' or platform == 'linux':
-                os.system('mv mindex.dat mi.dat')
-            mi = np.loadtxt('mi.dat')
-            npc = mi.shape[0]
-
-            xcheck = np.vstack((xtrain,xval))
-            regparams = np.ones((npc,1))
-
-            np.savetxt('xdata.dat',xtrain,delimiter='\t')
-            np.savetxt('xcheck.dat',xcheck,delimiter='\t')
-            np.savetxt('regparams.dat',regparams,delimiter='\t')
-
-            if platform == 'darwin' or platform == 'linux':
-                cmd = uqtkbin + 'regression -x xdata.dat -y ydata.dat -b PC_MI -s ' + pc_type +       \
-                        ' -p mi.dat -w regparams.dat -m ' + pred_mode + ' -r wbcs -t xcheck.dat -c ' + \
-                        str(tol) + ' > regr.log'
-            elif platform == 'win32':
-                cmd = uqtkbin + 'regression.exe -x xdata.dat -y ydata.dat -b PC_MI -s ' + pc_type +   \
-                        ' -p mi.dat -w regparams.dat -m ' + pred_mode + ' -r wbcs -t xcheck.dat -c ' + \
-                        str(tol) + ' > regr.log'
-            else:
-                sys.exit('platform: ' + platform + ' not included now')
-            print('Running ' + cmd)
-
-            os.system(cmd)
-
-            # Get the PC coefficients and multiindex and the predictive errorbars
-            pccf   = np.loadtxt('coeff.dat')
-            mindex = np.loadtxt('mindex_new.dat')
-
-            # Append the results
-            pccf_all.append(pccf.tolist())
-            mindex_all.append(mindex.tolist())
-
-            # Evaluate surrogate at training points
-            print('Evaluating surrogate at %d training points' % ntrain)
-            ytrain_pc[:,i] = model_pc(uqtkbin,xtrain,pccf,mindex,pars,del_opt)
-            err_train[i]   = np.linalg.norm(ytrain[:,i]-ytrain_pc[:,i])/np.linalg.norm(ytrain[:,i])
-            print('Surrogate relative error at training points : ' + str(err_train[i]))
-
-            # Evaluate surrogate at validating points
-            print('Evaluating surrogate at %d validating points' % nval)
-            yval_pc[:,i] = model_pc(uqtkbin,xval,pccf,mindex,pars,del_opt)
-            err_val[i]   = np.linalg.norm(yval[:,i]-yval_pc[:,i])/np.linalg.norm(yval[:,i])
-            print('Surrogate relative error at validating points : ' + str(err_val[i]))
-
-    correlation_matrix = np.corrcoef(yval_pc.ravel(),yval.ravel())
-    R2val = correlation_matrix[0,1]**2
-
-    if run_in_parallel:
-        allsens_main, allsens_total, allsens_joint = p_pce_sens(uqtkbin, pars, mindex_all, pccf_all, False) 
-        os.chdir(cur_dir)
+    if ntrain < 0.5*ntrain0:
+        print('Not enoguth training points!')
     else:
-        allsens_main, allsens_total, allsens_joint = p_pce_sens(uqtkbin, pars, mindex_all, pccf_all, del_opt) 
+        print('************ Trainning Surrogate Model ************')
 
-    if del_opt:
         if run_in_parallel:
-            shutil.rmtree(cur_dir + '/tmp' + str(tag)) 
+            if not os.path.isdir(cur_dir + '/tmp' + str(tag)):
+                os.mkdir(cur_dir + '/tmp' + str(tag))
+            os.chdir(cur_dir + '/tmp' + str(tag))
+
+        for i in range(nout):
+            print('##################################################')
+            print('-------------------- ' + str(i) + 'th QOI --------------------')
+            ydata = ytrain[:,i]
+
+            if np.isnan(ydata).all():
+                pccf_all.append(np.nan)
+                mindex_all.append(np.nan)
+            else:
+                np.savetxt('ydata.dat',ydata,delimiter='\t')
+
+                if platform == 'darwin' or platform == 'linux':
+                    cmd = uqtkbin + 'gen_mi -x"TO" -p ' + str(out_pcord) + ' -q' + str(in_pcdim) + ' > gmi.log'
+                elif platform == 'win32':
+                    cmd = uqtkbin + 'gen_mi.exe -x"TO" -p ' + str(out_pcord) + ' -q' + str(in_pcdim) + ' > gmi.log'
+                else:
+                    sys.exit('platform: ' + platform + ' not included now')
+                print('Running ' + cmd)
+
+                os.system(cmd)
+
+                if platform == 'win32':
+                    os.system('mv mindex.dat mi.dat')
+                elif platform == 'darwin' or platform == 'linux':
+                    os.system('mv mindex.dat mi.dat')
+                mi = np.loadtxt('mi.dat')
+                npc = mi.shape[0]
+
+                xcheck = np.vstack((xtrain,xval))
+                regparams = np.ones((npc,1))
+
+                np.savetxt('xdata.dat',xtrain,delimiter='\t')
+                np.savetxt('xcheck.dat',xcheck,delimiter='\t')
+                np.savetxt('regparams.dat',regparams,delimiter='\t')
+
+                if platform == 'darwin' or platform == 'linux':
+                    cmd = uqtkbin + 'regression -x xdata.dat -y ydata.dat -b PC_MI -s ' + pc_type +       \
+                            ' -p mi.dat -w regparams.dat -m ' + pred_mode + ' -r wbcs -t xcheck.dat -c ' + \
+                            str(tol) + ' > regr.log'
+                elif platform == 'win32':
+                    cmd = uqtkbin + 'regression.exe -x xdata.dat -y ydata.dat -b PC_MI -s ' + pc_type +   \
+                            ' -p mi.dat -w regparams.dat -m ' + pred_mode + ' -r wbcs -t xcheck.dat -c ' + \
+                            str(tol) + ' > regr.log'
+                else:
+                    sys.exit('platform: ' + platform + ' not included now')
+                print('Running ' + cmd)
+
+                os.system(cmd)
+
+                # Get the PC coefficients and multiindex and the predictive errorbars
+                pccf   = np.loadtxt('coeff.dat')
+                mindex = np.loadtxt('mindex_new.dat')
+
+                # Append the results
+                pccf_all.append(pccf.tolist())
+                mindex_all.append(mindex.tolist())
+
+                # Evaluate surrogate at training points
+                print('Evaluating surrogate at %d training points' % ntrain)
+                ytrain_pc[:,i] = model_pc(uqtkbin,xtrain,pccf,mindex,pars,del_opt)
+                err_train[i]   = np.linalg.norm(ytrain[:,i]-ytrain_pc[:,i])/np.linalg.norm(ytrain[:,i])
+                print('Surrogate relative error at training points : ' + str(err_train[i]))
+
+                # Evaluate surrogate at validating points
+                print('Evaluating surrogate at %d validating points' % nval)
+                yval_pc[:,i] = model_pc(uqtkbin,xval,pccf,mindex,pars,del_opt)
+                err_val[i]   = np.linalg.norm(yval[:,i]-yval_pc[:,i])/np.linalg.norm(yval[:,i])
+                print('Surrogate relative error at validating points : ' + str(err_val[i]))
+
+        correlation_matrix = np.corrcoef(yval_pc.ravel(),yval.ravel())
+        R2val = correlation_matrix[0,1]**2
+
+        if run_in_parallel:
+            allsens_main, allsens_total, allsens_joint = p_pce_sens(uqtkbin, pars, mindex_all, pccf_all, False) 
+            os.chdir(cur_dir)
         else:
-            os.remove("xcheck.dat") 
-            os.remove("regparams.dat")
-            os.remove("regr.log")
-            os.remove("mi.dat")
-            os.remove("gmi.log") 
-            os.remove("mindex_new.dat")
-            os.remove("coeff.dat")
-            os.remove("lambdas.dat")
-            os.remove("selected.dat")
-            os.remove("Sig.dat")
-            os.remove("sigma2.dat")
-            os.remove("ycheck.dat") 
-            os.remove("ycheck_var.dat")
+            allsens_main, allsens_total, allsens_joint = p_pce_sens(uqtkbin, pars, mindex_all, pccf_all, del_opt) 
+
+        if del_opt:
+            if run_in_parallel:
+                shutil.rmtree(cur_dir + '/tmp' + str(tag)) 
+            else:
+                os.remove("xcheck.dat") 
+                os.remove("regparams.dat")
+                os.remove("regr.log")
+                os.remove("mi.dat")
+                os.remove("gmi.log") 
+                os.remove("mindex_new.dat")
+                os.remove("coeff.dat")
+                os.remove("lambdas.dat")
+                os.remove("selected.dat")
+                os.remove("Sig.dat")
+                os.remove("sigma2.dat")
+                os.remove("ycheck.dat") 
+                os.remove("ycheck_var.dat")
 
     return ytrain_pc, yval_pc, pccf_all, mindex_all, R2val, allsens_main, allsens_total, allsens_joint
 
@@ -188,7 +192,7 @@ def p_pce_sens(uqtkbin, pars, mindex_all, pccf_all, del_opt):
         mindex = mindex_all[i]
         pccf   = pccf_all[i]
         
-        if not np.isnan(pccf).any() and np.mean(ytrain) > 0:
+        if not np.isnan(pccf).any():
             if isinstance(pccf,float):
                 np.savetxt('PCcoeff.dat',pccf*np.ones((1,1)))
                 np.savetxt('mindex.dat',np.reshape(mindex,(1,len(mindex))),fmt='%d')
