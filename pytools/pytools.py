@@ -29,6 +29,16 @@ def train_pce(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
 
     return ytrain_pc, yval_pc, pccf_all, mindex_all, allsens_main, allsens_total, allsens_joint
 
+def get_default_parameter():
+
+    pars = dict()
+    pars['pc_type']   = 'LU'
+    pars['in_pcdim']  = 11
+    pars['out_pcord'] = 3
+    pars['pred_mode'] = 'ms'
+    pars['tol']       = 1e-3
+
+
 def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None,threhold=None):
 
     if cur_dir == None:
@@ -47,8 +57,10 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
     yval_pc[:]    = np.nan
     err_train     = np.empty((nout,1))
     err_val       = np.empty((nout,1))
+    R2val         = np.empty((1,1))
     err_train[:]  = np.nan
     err_val[:]    = np.nan
+    R2val[:]      = np.nan
 
     pc_type       = pars['pc_type']
     in_pcdim      = pars['in_pcdim']
@@ -132,6 +144,9 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
             err_val[i]   = np.linalg.norm(yval[:,i]-yval_pc[:,i])/np.linalg.norm(yval[:,i])
             print('Surrogate relative error at validating points : ' + str(err_val[i]))
 
+    correlation_matrix = np.corrcoef(yval_pc.ravel(),yval.ravel())
+    R2val = correlation_matrix[0,1]**2
+
     if run_in_parallel:
         allsens_main, allsens_total, allsens_joint = p_pce_sens(uqtkbin, pars, mindex_all, pccf_all, False) 
         os.chdir(cur_dir)
@@ -156,7 +171,7 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
             os.remove("ycheck.dat") 
             os.remove("ycheck_var.dat")
 
-    return ytrain_pc, yval_pc, pccf_all, mindex_all, allsens_main, allsens_total, allsens_joint
+    return ytrain_pc, yval_pc, pccf_all, mindex_all, R2val, allsens_main, allsens_total, allsens_joint
 
 def p_pce_sens(uqtkbin, pars, mindex_all, pccf_all, del_opt):
 
