@@ -38,7 +38,6 @@ def get_default_parameter():
     pars['pred_mode'] = 'ms'
     pars['tol']       = 1e-3
 
-
 def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None,threhold=None):
 
     if cur_dir == None:
