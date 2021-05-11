@@ -1,7 +1,14 @@
-function [ytrain_pc, yval_pc, pccf_all, mindex_all] = m_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt)
+function [ytrain_pc, yval_pc, pccf_all, mindex_all, allsens_main,allsens_total,allsens_joint] = m_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,currdir,tag)
     
     if nargin < 7
         del_opt = 1; % Default mode is to delete all the files
+    end
+    if nargin == 7
+        parallel_mode = 0;
+    elseif nargin == 9
+        parallel_mode = 1;
+    else
+        error('Check the input!!!');
     end
     
     [ntrain,nout] = size(ytrain);
@@ -22,6 +29,14 @@ function [ytrain_pc, yval_pc, pccf_all, mindex_all] = m_pce_bcs(uqtkbin,pars,xtr
     out_pcord = pars.out_pcord;
     pred_mode = pars.pred_mode;
     tol       = pars.tol;
+    
+    if parallel_mode
+        workdir = fullfile(currdir,['tmp' num2str(tag)]);
+        if ~exist(workdir,'dir')
+            mkdir(workdir);
+        end
+        cd(workdir);
+    end
     
     fprintf('\n\n************ Trainning Surrogate Model ************\n');
     for i = 1 : nout
@@ -88,13 +103,24 @@ function [ytrain_pc, yval_pc, pccf_all, mindex_all] = m_pce_bcs(uqtkbin,pars,xtr
         fprintf('\n###################################################\n');
         
     end
+    
+    [allsens_main,allsens_total,allsens_joint] = m_pce_sens(uqtkbin,pars,mindex_all,pccf_all);
+    
+    if parallel_mode
+        cd(currdir);
+    end
     % delte files
     if del_opt
-        delete xcheck.dat; delete regparams.dat; delete regr.log;
-        delete mi.dat; delete gmi.log; delete mindex_new.dat; delete coeff.dat;
+        if parallel_mode
+            delete(fullfile(['tmp' tag],'*'));
+            rmdir(fullfile(['tmp' tag]));
+        else
+            delete xcheck.dat; delete regparams.dat; delete regr.log;
+            delete mi.dat; delete gmi.log; delete mindex_new.dat; delete coeff.dat;
 
-        delete lambdas.dat; delete selected.dat; delete Sig.dat; delete sigma2.dat;
-        delete ycheck.dat; delete ycheck_var.dat;
+            delete lambdas.dat; delete selected.dat; delete Sig.dat; delete sigma2.dat;
+            delete ycheck.dat; delete ycheck_var.dat;
+        end
     end
 end
     
