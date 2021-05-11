@@ -112,8 +112,8 @@ function [ytrain_pc, yval_pc, pccf_all, mindex_all, allsens_main,allsens_total,a
     % delte files
     if del_opt
         if parallel_mode
-            delete(fullfile(['tmp' tag],'*'));
-            rmdir(fullfile(['tmp' tag]));
+            delete(fullfile(['tmp' num2str(tag)],'*'));
+            rmdir(fullfile(['tmp' num2str(tag)]));
         else
             delete xcheck.dat; delete regparams.dat; delete regr.log;
             delete mi.dat; delete gmi.log; delete mindex_new.dat; delete coeff.dat;
