@@ -1,4 +1,5 @@
-function [ytrain_pc, yval_pc, pccf_all, mindex_all, allsens_main,allsens_total,allsens_joint] = m_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,currdir,tag)
+function [ytrain_pc, yval_pc,err_train, err_val, pccf_all, mindex_all, allsens_main,allsens_total,allsens_joint] =  ...
+          m_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,currdir,tag)
     
     if nargin < 7
         del_opt = 1; % Default mode is to delete all the files

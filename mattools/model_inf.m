@@ -1,4 +1,4 @@
-function [mapparam,pchain] = model_inf(uqtkbin, X, Y, pars, mindex_all, pccf_all, del_opt, currdir, tag)
+function [mapparam,pchain] = model_inf(uqtkbin, X, Y, pars, mindex_all, pccf_all, xfix, del_opt, currdir, tag)
 % INPUT:
 % uqtkbin: UQTk installed function dirctory
 % X [ N ]: design or controllable parameter
@@ -9,9 +9,9 @@ function [mapparam,pchain] = model_inf(uqtkbin, X, Y, pars, mindex_all, pccf_all
 % del_opt: del_opt = 1 -> delete all the middle files 
 % currdir, tag: for parallel processing 
 
-    if nargin == 7
+    if nargin == 8
         parallel_mode = 0;
-    elseif nargin == 9
+    elseif nargin == 10
         parallel_mode = 1;
     else
         error('Check the input!!!');
@@ -38,6 +38,7 @@ function [mapparam,pchain] = model_inf(uqtkbin, X, Y, pars, mindex_all, pccf_all
     end
     dlmwrite('xdata.dat', X, ' ');
     dlmwrite('ydata.dat', Y, ' ');
+    dlmwrite('fixindnom.dat',xfix, ' ');
 %     dlmwrite('xdata1.dat', X, ' ');
 %     dlmwrite('ydata1.dat', Y, ' ');
 
@@ -58,14 +59,14 @@ function [mapparam,pchain] = model_inf(uqtkbin, X, Y, pars, mindex_all, pccf_all
         a = -1;
         b = 1;
     end
-    PDIM = pars.in_pcdim;
+    PDIM = pars.in_pcdim - size(xfix,1);
     
     %cmd = [uqtkbin 'model_inf -f pcs -l classical -d ' num2str(PDIM) ' > inference.log'];
     if ispc
-        cmd =[uqtkbin 'model_inf.exe -f pcs -l classical -a ' num2str(a) ' -b ' num2str(b) ' -d ' num2str(PDIM) ' -m 10000 -o ' num2str(pars.out_pcord) ' > inference.log'];
+        cmd =[uqtkbin 'model_inf.exe -f pcs -l classical -s pci -g 0.5 -z -u 5 -a ' num2str(a) ' -b ' num2str(b) ' -d ' num2str(PDIM) ' -m 10000 -o 0 -v fixindnom.dat > inference.log'];
         fprintf(['Running ' cmd]);
     else
-        cmd = [uqtkbin 'model_inf -f pcs -l classical -a ' num2str(a) ' -b ' num2str(b) ' -d ' num2str(PDIM) ' -m 10000 -o ' num2str(pars.out_pcord) ' > inference.log'];
+        cmd = [uqtkbin 'model_inf -f pcs -l classical -s pci -g 0.5 -z -u 5 -a ' num2str(a) ' -b ' num2str(b) ' -d ' num2str(PDIM) ' -m 10000 -o 0 -v fixindnom.dat > inference.log'];
         fprintf(['Running ' cmd '\n']);
     end
     [status,cmdout] = system(cmd,'-echo');
