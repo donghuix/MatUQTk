@@ -1,4 +1,4 @@
-function [mapparam,pchain] = model_inf(uqtkbin, X, Y, pars, mindex_all, pccf_all, xfix, del_opt, currdir, tag)
+function [mapparam,pchain,chain,fmeans_sams] = model_inf(uqtkbin, X, Y, pars, mindex_all, pccf_all, xfix, del_opt, currdir, tag)
 % INPUT:
 % uqtkbin: UQTk installed function dirctory
 % X [ N ]: design or controllable parameter
@@ -63,19 +63,20 @@ function [mapparam,pchain] = model_inf(uqtkbin, X, Y, pars, mindex_all, pccf_all
     
     %cmd = [uqtkbin 'model_inf -f pcs -l classical -d ' num2str(PDIM) ' > inference.log'];
     if ispc
-        cmd =[uqtkbin 'model_inf.exe -f pcs -l classical -s pci -g 0.5 -z -u 5 -a ' num2str(a) ' -b ' num2str(b) ' -d ' num2str(PDIM) ' -m 10000 -o 0 -v fixindnom.dat > inference.log'];
+        cmd =[uqtkbin 'model_inf.exe -f pcs -l classical -s pci -g 0.5 -z -u 5 -e 0.01 -a ' num2str(a) ' -b ' num2str(b) ' -d ' num2str(PDIM) ' -m 10000 -o 0 -v fixindnom.dat > inference.log'];
         fprintf(['Running ' cmd]);
     else
-        cmd = [uqtkbin 'model_inf -f pcs -l classical -s pci -g 0.5 -z -u 5 -a ' num2str(a) ' -b ' num2str(b) ' -d ' num2str(PDIM) ' -m 10000 -o 0 -v fixindnom.dat > inference.log'];
+        cmd = [uqtkbin 'model_inf -f pcs -l classical -s pci -g 0.5 -z -u 5 -e 0.01 -a ' num2str(a) ' -b ' num2str(b) ' -d ' num2str(PDIM) ' -m 10000 -o 0 -v fixindnom.dat > inference.log'];
         fprintf(['Running ' cmd '\n']);
     end
     [status,cmdout] = system(cmd,'-echo');
-    %chain = load('chain.dat');
+    chain = load('chain.dat');
     %likelihood = chain(:,end);
     %ibest = find(likelihood == max(likelihood));
     %mapparam = nanmean(chain(ibest,2:end-3),1);
     mapparam = load('mapparam.dat');
     pchain   = load('pchain.dat');
+    fmeans_sams = load('fmeans_sams.dat');
     if parallel_mode
         cd(currdir);
     end
