@@ -1,4 +1,4 @@
-function [outputs,status,cmdout] = m_cor_kl(cor_kl_exe,data,e,reconstruct)
+function [outputs,status,cmdout] = m_cor_kl(cor_kl_exe,data,e,reconstruct,currdir,tag)
 % matlab interface for Karhunen-Loeve Decomposition
 % #-INPUTS-# 
 % cor_kl_exe: directory of cor_kl execute file
@@ -13,7 +13,23 @@ function [outputs,status,cmdout] = m_cor_kl(cor_kl_exe,data,e,reconstruct)
 % #---------#
 %
 % Donghui Xu, 08/26/2020
-
+    
+    if nargin == 4
+        parallel_mode = 0;
+    elseif nargin == 6
+        parallel_mode = 1;
+    else
+        error('Check the input!!!');
+    end
+    
+    if parallel_mode
+        workdir = fullfile(currdir,['tmp' num2str(tag)]);
+        if ~exist(workdir,'dir')
+            mkdir(workdir);
+        end
+        cd(workdir);
+    end
+    
     if ( ~exist(cor_kl_exe,'file') )
         error([cor_kl_exe ' does not exist!'])
     end
@@ -51,7 +67,13 @@ function [outputs,status,cmdout] = m_cor_kl(cor_kl_exe,data,e,reconstruct)
     end
     
     % clean the files
-    delete xi_data.dat mean.dat KLmodes.dat eig.dat rel_diag.dat cov_out.dat;
-    delete ydata.dat xgrid.dat;
+    if parallel_mode
+        cd(currdir);
+        delete(fullfile(['tmp' num2str(tag)],'*'));
+        rmdir(fullfile(['tmp' num2str(tag)]));
+    else
+        delete xi_data.dat mean.dat KLmodes.dat eig.dat rel_diag.dat cov_out.dat;
+        delete ydata.dat xgrid.dat;
+    end
 end
 
