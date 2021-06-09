@@ -1,4 +1,4 @@
-function [mapparam,pchain,chain,fmeans_sams] = model_inf(uqtkbin, X, Y, pars, mindex_all, pccf_all, xfix, del_opt, currdir, tag)
+function [mapparam,pchain,chain,fmeans_sams] = model_inf(uqtkbin, X, Y, pars, e, mindex_all, pccf_all, xfix, del_opt, currdir, tag)
 % INPUT:
 % uqtkbin: UQTk installed function dirctory
 % X [ N ]: design or controllable parameter
@@ -9,9 +9,9 @@ function [mapparam,pchain,chain,fmeans_sams] = model_inf(uqtkbin, X, Y, pars, mi
 % del_opt: del_opt = 1 -> delete all the middle files 
 % currdir, tag: for parallel processing 
 
-    if nargin == 8
+    if nargin == 9
         parallel_mode = 0;
-    elseif nargin == 10
+    elseif nargin == 11
         parallel_mode = 1;
     else
         error('Check the input!!!');
@@ -63,10 +63,10 @@ function [mapparam,pchain,chain,fmeans_sams] = model_inf(uqtkbin, X, Y, pars, mi
     
     %cmd = [uqtkbin 'model_inf -f pcs -l classical -d ' num2str(PDIM) ' > inference.log'];
     if ispc
-        cmd =[uqtkbin 'model_inf.exe -f pcs -l classical -s pci -g 0.5 -z -u 5 -e 0.1 -a ' num2str(a) ' -b ' num2str(b) ' -d ' num2str(PDIM) ' -m 10000 -o 0 -v fixindnom.dat > inference.log'];
+        cmd =[uqtkbin 'model_inf.exe -f pcs -l classical -s pci -g 0.5 -z -u 10 -e ' num2str(e) ' -a ' num2str(a) ' -b ' num2str(b) ' -d ' num2str(PDIM) ' -m 10000 -o 0 -v fixindnom.dat > inference.log'];
         fprintf(['Running ' cmd]);
     else
-        cmd = [uqtkbin 'model_inf -f pcs -l classical -s pci -g 0.5 -z -u 5 -e 0.1 -a ' num2str(a) ' -b ' num2str(b) ' -d ' num2str(PDIM) ' -m 10000 -o 0 -v fixindnom.dat > inference.log'];
+        cmd = [uqtkbin 'model_inf -f pcs -l classical -s pci -g 0.5 -z -u 10 -e ' num2str(e) ' -a ' num2str(a) ' -b ' num2str(b) ' -d ' num2str(PDIM) ' -m 20000 -o 0 -v fixindnom.dat > inference.log'];
         fprintf(['Running ' cmd '\n']);
     end
     [status,cmdout] = system(cmd,'-echo');
