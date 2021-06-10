@@ -47,8 +47,10 @@ def p_pce_bcs(uqtkbin,pars,xtrain,ytrain,xval,yval,del_opt,cur_dir=None,tag=None
     else:
         run_in_parallel = True
 
-    ntrain0 = xtrain.shape[0]
-    xtrain,ytrain,ntrain,xval,yval,nval = preprocess_training_data(xtrain,ytrain,xval,yval,threhold)
+    ntrain = xtrain.shape[0]
+    nval   = xval.shape[0]
+    ntrain0 = 0
+    #xtrain,ytrain,ntrain,xval,yval,nval = preprocess_training_data(xtrain,ytrain,xval,yval,threhold)
     nout          = ytrain.shape[1]
     npar          = xtrain.shape[1]
 
