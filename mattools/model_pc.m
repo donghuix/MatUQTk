@@ -17,9 +17,13 @@ function pcoutput = model_pc(uqtkbin,xtrain,mindex,pccf,pc_type,del_opt,currdir,
             mkdir(workdir);
         end
         cd(workdir);
+        dlmwrite(fullfile(getenv('wkdir'),'mindex.dat'),mindex,'delimiter',' ');
+        dlmwrite(fullfile(getenv('wkdir'),'pccf.dat'),pccf,'delimiter',' ');
+    else
+        dlmwrite('mindex.dat',mindex,'delimiter',' ');
+        dlmwrite('pccf.dat',pccf,'delimiter',' ');
     end
-    dlmwrite(fullfile(getenv('wkdir'),'mindex.dat'),mindex,'delimiter',' ');
-    dlmwrite(fullfile(getenv('wkdir'),'pccf.dat'),pccf,'delimiter',' ');
+    
     pctype = pc_type;
     
     dlmwrite('xdata.dat',xtrain,' ');

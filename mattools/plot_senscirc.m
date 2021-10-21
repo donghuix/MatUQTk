@@ -65,11 +65,11 @@ function plot_senscirc(ax,allmain,alljoint,maxcirclesize,minjoint,maxlinewidth,p
         ypara = yunit(1:floor(length(xunit)/npara):end);
         xpara = xpara(1:npara);
         ypara = ypara(1:npara);
-
+        
         [sortmain,ind] = sort(allmain,'descend');
         % Plot joint sensitivity first
-        for i = 1 : 11
-            for j = 1 : 11
+        for i = 1 : npara
+            for j = 1 : npara
                 if i ~= j && alljoint(ind(i),ind(j)) > minjoint
                     plot(ax,[xpara(i) xpara(j)],[ypara(i) ypara(j)],'-','Color',[99, 189, 179]./255,'LineWidth',maxlinewidth.*alljoint(ind(i),ind(j)));
                 end
@@ -87,11 +87,11 @@ function plot_senscirc(ax,allmain,alljoint,maxcirclesize,minjoint,maxlinewidth,p
             if k*floor((npts+100)/npara) > npts
                 text(ax,xi(k*floor((npts+100)/npara)-npts)*1.075, ...
                         yi(k*floor((npts+100)/npara)-npts)*1.075, ...
-                        num2str(i),'FontSize',12);
+                        paranames{i},'FontSize',14);
             else
-                text(ax,xi(k*floor((npts+100)/npara))*1.075, ...
-                        yi(k*floor((npts+100)/npara))*1.075, ...
-                        num2str(i),'FontSize',12);
+                text(ax,xi(k*floor((npts+100)/npara))*1.075-0.2, ...
+                        yi(k*floor((npts+100)/npara))*1.075+0.1, ...
+                        paranames{i},'FontSize',14);
             end
 
             %scatter(xpara(k),ypara(k),sz(i),'o','MarkerFaceColor',[248, 187, 0]./255,'MarkerEdgeColor','k');
