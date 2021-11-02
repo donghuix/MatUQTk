@@ -17,8 +17,9 @@ function plot_senscirc(ax,allmain,alljoint,maxcirclesize,minjoint,maxlinewidth,p
     if add_legend
         % add legend for main sensitivity
         nleg = 5;
-        %mainleg = min(allmain) : (max(allmain)-min(allmain))/(nleg-1) : max(allmain);
-        mainleg = [0.01 0.1 0.2 0.3 0.4];
+        mainleg = min(allmain) : (max(allmain)-min(allmain))/(nleg-1) : max(allmain);
+        mainleg = round(mainleg,2);
+        %mainleg = [0.01 0.1 0.2 0.3 0.4];
         yi = -1:2./(nleg-1):1;
         xi = zeros(nleg,1);
         for i = 1 : nleg
@@ -42,7 +43,13 @@ function plot_senscirc(ax,allmain,alljoint,maxcirclesize,minjoint,maxlinewidth,p
         end
         
         % add legend for joint sensitivity
-        jointleg = 0.01 : 0.01 : 0.05;
+        alljoint(alljoint == diag(alljoint)) = 0;
+        jointleg = min(alljoint(:)) : (max(alljoint(:))-min(alljoint(:)))/(nleg-1) : max(alljoint(:));
+        jointleg = round(jointleg,2);
+        if min(jointleg) == 0
+            jointleg(1) = 0.01;
+        end
+        %jointleg = 0.01 : 0.01 : 0.05;
         yi = -1:2./(nleg-1):1;
         xi = ones(nleg,1);
         for i = 1 : nleg
@@ -84,15 +91,37 @@ function plot_senscirc(ax,allmain,alljoint,maxcirclesize,minjoint,maxlinewidth,p
             yi = allmain(i) * maxcirclesize * sin(thi)+ypara(k);
             plot(ax,xi,yi,'k-','LineWidth',3);axis equal; hold on;
             fill(ax,xi,yi,[248, 187, 0]./255);
-            if k*floor((npts+100)/npara) > npts
-                text(ax,xi(k*floor((npts+100)/npara)-npts)*1.075, ...
-                        yi(k*floor((npts+100)/npara)-npts)*1.075, ...
-                        paranames{i},'FontSize',14);
+            xilabel = 0.5*maxcirclesize * cos(thi)+xpara(k);
+            yilabel = 0.5*maxcirclesize * sin(thi)+ypara(k);
+%             if k*floor((npts+100)/npara) > npts
+%                 text(ax,xi(k*floor((npts+100)/npara)-npts)*1.075, ...
+%                         yi(k*floor((npts+100)/npara)-npts)*1.075, ...
+%                         paranames{i},'FontSize',14);
+%             else
+%                 text(ax,xi(k*floor((npts+100)/npara))*1.075-0.2, ...
+%                         yi(k*floor((npts+100)/npara))*1.075+0.1, ...
+%                         paranames{i},'FontSize',14);
+%             end
+            if (k-1)/npara <= 0.25
+                text(ax,xi((k-1)*floor(npts/npara)+1)-0.1, ...
+                        yi((k-1)*floor(npts/npara)+1)+0.1, ...
+                        num2str(k),'FontSize',14,'FontWeight','bold');
+            elseif (k-1)/npara <= 0.5
+                text(ax,xi((k-1)*floor(npts/npara)+1)-0.1, ...
+                        yi((k-1)*floor(npts/npara)+1)-0.1, ...
+                        num2str(k),'FontSize',14,'FontWeight','bold');
+            elseif (k-1)/npara <= 0.75
+                text(ax,xi((k-1)*floor(npts/npara)+1)+0.05, ...
+                        yi((k-1)*floor(npts/npara)+1)-0.05, ...
+                        num2str(k),'FontSize',14,'FontWeight','bold');
             else
-                text(ax,xi(k*floor((npts+100)/npara))*1.075-0.2, ...
-                        yi(k*floor((npts+100)/npara))*1.075+0.1, ...
-                        paranames{i},'FontSize',14);
+                text(ax,xi((k-1)*floor(npts/npara)+1)+0.05, ...
+                        yi((k-1)*floor(npts/npara)+1)+0.05, ...
+                        num2str(k),'FontSize',14,'FontWeight','bold');
             end
+%             text(ax,xilabel((k-1)*floor(npts/npara)+1), ...
+%                     yilabel((k-1)*floor(npts/npara)+1), ...
+%                     paranames{i},'FontSize',14);
 
             %scatter(xpara(k),ypara(k),sz(i),'o','MarkerFaceColor',[248, 187, 0]./255,'MarkerEdgeColor','k');
             k = k + 1;
