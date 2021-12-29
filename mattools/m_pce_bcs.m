@@ -4,7 +4,7 @@ function [ytrain_pc, yval_pc,err_train, err_val, pccf_all, mindex_all, allsens_m
     if nargin < 7
         del_opt = 1; % Default mode is to delete all the files
     end
-    if nargin == 7
+    if nargin == 6
         parallel_mode = 0;
     elseif nargin == 9
         parallel_mode = 1;
