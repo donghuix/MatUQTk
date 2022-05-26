@@ -63,10 +63,10 @@ function [mapparam,pchain,chain,fmeans_sams] = model_inf(uqtkbin, X, Y, pars, e,
     
     %cmd = [uqtkbin 'model_inf -f pcs -l classical -d ' num2str(PDIM) ' > inference.log'];
     if ispc
-        cmd =[uqtkbin 'model_inf.exe -f pcs -l classical -s pci -g 0.5 -z -u 10 -e ' num2str(e) ' -a ' num2str(a) ' -b ' num2str(b) ' -d ' num2str(PDIM) ' -m 10000 -o 0 -v fixindnom.dat > inference.log'];
+        cmd =[uqtkbin 'model_inf.exe -f pcs -l classical -s pci -g 0.5 -z -u 10 -e ' num2str(e) ' -a ' num2str(a) ' -b ' num2str(b) ' -d ' num2str(PDIM) ' -m ' num2str(pars.iteration) ' -o 0 -v fixindnom.dat > inference.log'];
         fprintf(['Running ' cmd]);
     else
-        cmd = [uqtkbin 'model_inf -f pcs -l classical -s pci -g 0.5 -z -u 10 -e ' num2str(e) ' -a ' num2str(a) ' -b ' num2str(b) ' -d ' num2str(PDIM) ' -m 10000 -o 0 -v fixindnom.dat > inference.log'];
+        cmd = [uqtkbin 'model_inf -f pcs -l classical -s pci -g 0.5 -z -u 10 -e ' num2str(e) ' -a ' num2str(a) ' -b ' num2str(b) ' -d ' num2str(PDIM) ' -m ' num2str(pars.iteration) ' -o 0 -v fixindnom.dat > inference.log'];
         fprintf(['Running ' cmd '\n']);
     end
     [status,cmdout] = system(cmd,'-echo');
